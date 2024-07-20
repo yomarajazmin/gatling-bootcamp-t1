@@ -11,13 +11,14 @@ import templates.Templates;
 import java.time.Duration;
 
 import static io.gatling.javaapi.core.CoreDsl.*;
-import static io.gatling.javaapi.core.CoreDsl.constantUsersPerSec;
 import static io.gatling.javaapi.http.HttpDsl.http;
 import static io.gatling.javaapi.http.HttpDsl.status;
 
 public class RestfulAPIDev extends Simulation {
 
     String baseUrl = System.getProperty("baseUrl", "https://api.restful-api.dev");
+    String concurrentUsers = System.getProperty("concurrentUsers", "5");
+    String durationOfSeconds = System.getProperty("durationOfSeconds", "5");
 
     FeederBuilder<String> feeder = csv("data/object.csv").random();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -76,12 +77,16 @@ public class RestfulAPIDev extends Simulation {
 
     {
         setUp(
-                scn.injectOpen(
-                        atOnceUsers(10),
-                        nothingFor(Duration.ofSeconds(5)),
-                        rampUsers(10).during(Duration.ofSeconds(10)),
-                        constantUsersPerSec(20).during(Duration.ofSeconds(10)
-                        )
+//                scn.injectOpen(
+////                        atOnceUsers(10),
+////                        nothingFor(Duration.ofSeconds(5)),
+////                        rampUsers(10).during(Duration.ofSeconds(10)),
+////                        constantUsersPerSec(20).during(Duration.ofSeconds(10)
+//                        )
+//                )
+                scn.injectClosed(
+                        constantConcurrentUsers(Integer.parseInt(concurrentUsers))
+                                .during(Duration.ofSeconds(Integer.parseInt(durationOfSeconds)))
                 )
         ).protocols(httpProtocol);
     }
